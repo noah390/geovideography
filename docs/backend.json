@@ -4,15 +4,15 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Continent",
       "type": "object",
-      "description": "Represents a major landmass or geographical region where countries are located. Used for filtering flags.",
+      "description": "Represents a major landmass or geographical region.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Continent entity."
+          "description": "Unique identifier (e.g., 'africa')."
         },
         "name": {
           "type": "string",
-          "description": "The common name of the continent (e.g., 'Europe', 'Africa')."
+          "description": "Name of the continent."
         }
       },
       "required": [
@@ -24,111 +24,52 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Country",
       "type": "object",
-      "description": "Represents a sovereign country, including its essential geographical, demographic, and flag information.",
+      "description": "Represents a sovereign country with its administrative data and history.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Country entity."
+          "description": "ISO alpha-2 code."
         },
         "name": {
-          "type": "string",
-          "description": "The common name of the country (e.g., 'United States')."
-        },
-        "officialName": {
-          "type": "string",
-          "description": "The official name of the country (e.g., 'United States of America')."
-        },
-        "alpha2Code": {
-          "type": "string",
-          "description": "The two-letter ISO 3166-1 alpha-2 code for the country (e.g., 'US')."
-        },
-        "alpha3Code": {
-          "type": "string",
-          "description": "The three-letter ISO 3166-1 alpha-3 code for the country (e.g., 'USA')."
+          "type": "string"
         },
         "capital": {
-          "type": "string",
-          "description": "The capital city of the country."
+          "type": "string"
         },
         "population": {
-          "type": "number",
-          "description": "The estimated population of the country."
+          "type": "number"
         },
-        "area": {
-          "type": "number",
-          "description": "The total land area of the country in square kilometers."
-        },
-        "region": {
+        "continent": {
           "type": "string",
-          "description": "The broad geographical region the country belongs to (e.g., 'Americas', 'Europe')."
+          "enum": ["Africa", "Americas", "Asia", "Europe", "Oceania"]
         },
         "subregion": {
+          "type": "string"
+        },
+        "flagUrl": {
           "type": "string",
-          "description": "A more specific geographical subregion within the main region (e.g., 'Northern Europe')."
-        },
-        "timezones": {
-          "type": "array",
-          "description": "A list of timezones observed in the country.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "callingCodes": {
-          "type": "array",
-          "description": "A list of international direct dialing codes for the country.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "topLevelDomain": {
-          "type": "array",
-          "description": "A list of top-level internet domains for the country (e.g., '.us', '.uk').",
-          "items": {
-            "type": "string"
-          }
-        },
-        "currencies": {
-          "type": "array",
-          "description": "A list of currency codes used in the country (e.g., 'USD', 'EUR').",
-          "items": {
-            "type": "string"
-          }
-        },
-        "languages": {
-          "type": "array",
-          "description": "A list of major language names spoken in the country (e.g., 'English', 'Spanish').",
-          "items": {
-            "type": "string"
-          }
-        },
-        "flagUrlSvg": {
-          "type": "string",
-          "description": "The URL to the SVG image file of the country's flag.",
           "format": "uri"
         },
-        "flagUrlPng": {
+        "history": {
           "type": "string",
-          "description": "The URL to the PNG image file of the country's flag.",
-          "format": "uri"
+          "description": "The historical story of the nation."
         },
-        "continentId": {
-          "type": "string",
-          "description": "Reference to the Continent entity this country belongs to. (Relationship: Continent 1:N Country)"
+        "statesCount": {
+          "type": "number"
+        },
+        "lgasCount": {
+          "type": "number"
         }
       },
       "required": [
         "id",
         "name",
-        "officialName",
-        "alpha2Code",
-        "alpha3Code",
         "capital",
-        "population",
-        "area",
-        "region",
-        "continentId",
-        "flagUrlSvg",
-        "flagUrlPng"
+        "continent",
+        "flagUrl",
+        "history",
+        "statesCount",
+        "lgasCount"
       ]
     }
   },
@@ -147,13 +88,7 @@
           "schema": {
             "$ref": "#/backend/entities/Continent"
           },
-          "description": "Stores globally accessible, public read-only information about continents. Used primarily for filtering countries. All documents in this collection are publicly readable.",
-          "params": [
-            {
-              "name": "continentId",
-              "description": "The unique identifier for a specific continent."
-            }
-          ]
+          "description": "Public list of continents."
         }
       },
       {
@@ -163,16 +98,10 @@
           "schema": {
             "$ref": "#/backend/entities/Country"
           },
-          "description": "Stores globally accessible, public read-only information about countries, including flag URLs and details. Each document includes `continentId` to facilitate direct filtering. All documents in this collection are publicly readable.",
-          "params": [
-            {
-              "name": "countryId",
-              "description": "The unique identifier for a specific country."
-            }
-          ]
+          "description": "Public list of countries with real-time data."
         }
       }
     ],
-    "reasoning": "The FlagSphere application primarily deals with static, public read-only data for `Continents` and `Countries`. Given this nature, the data structure focuses on simplicity, efficient querying, and robust public read access without complex authorization. Two top-level collections are recommended: `/continents` and `/countries`.\n\n**Authorization Independence:**\nSince all `Continent` and `Country` data is globally public and read-only for end-users, there are no complex authorization dependencies to manage. No user-specific roles, ownership, or collaborative access models are required for these core data entities. Consequently, no denormalization for authorization context (e.g., `ownerId` or `members` maps) is needed on these documents. Firebase Security Rules for both collections will simply grant `read` access to all users (authenticated or unauthenticated), inherently ensuring authorization independence as no `get()` operations on parent documents or other collections will ever be required for authorization checks. This design minimizes rule complexity and maximizes debuggability.\n\n**QAPs (Rules are not Filters):**\n1.  **`/continents/{continentId}`:** This collection will store all `Continent` documents. Since all continents are public and discoverable, a `list` operation on `/continents` will securely retrieve all `Continent` documents. The security rules will permit this `list` operation without any filtering logic, as all documents in this collection share the same public security posture.\n2.  **`/countries/{countryId}`:** This collection will store all `Country` documents. All country flags and associated information are public. Users can browse all, search by name, or filter by `continentId`. The `continentId` field embedded directly within each `Country` document facilitates efficient client-side queries (e.g., `firestore.collection('countries').where('continentId', '==', 'someContinentId')`). The security rules will allow `list` operations on `/countries` without imposing any filtering logic. The application's queries will handle filtering for specific continents or searches, while the security rules will simply validate that the user has permission to read the requested public data, adhering to the principle that 'rules are not filters'. This approach ensures predictable query behavior and straightforward rule maintenance."
+    "reasoning": "We use top-level collections for Continents and Countries as they are global reference data. This allows for efficient filtering by continent and global searching."
   }
 }

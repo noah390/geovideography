@@ -1,13 +1,14 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
-import { COUNTRIES } from "@/lib/countries-data";
+import { useCollection, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
+import { useFirestore } from "@/firebase";
 import { Navbar } from "@/components/layout/Navbar";
 import { FlagCard } from "@/components/flags/FlagCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, Globe2 } from "lucide-react";
+import { Search, Filter, Globe2, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,14 +21,23 @@ const CONTINENTS = ["All", "Africa", "Americas", "Asia", "Europe", "Oceania"] as
 export default function BrowsePage() {
   const [search, setSearch] = useState("");
   const [continent, setContinent] = useState<typeof CONTINENTS[number]>("All");
+  const firestore = useFirestore();
+
+  const countriesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, "countries");
+  }, [firestore]);
+
+  const { data: countries, isLoading } = useCollection(countriesQuery);
 
   const filteredCountries = useMemo(() => {
-    return COUNTRIES.filter((c) => {
+    if (!countries) return [];
+    return countries.filter((c) => {
       const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
       const matchesContinent = continent === "All" || c.continent === continent;
       return matchesSearch && matchesContinent;
     });
-  }, [search, continent]);
+  }, [search, continent, countries]);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -37,13 +47,13 @@ export default function BrowsePage() {
         <div className="max-w-3xl space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest">
             <Globe2 className="h-3 w-3" />
-            <span>Global Database</span>
+            <span>Real-time Global Database</span>
           </div>
           <h1 className="text-6xl font-headline font-black text-foreground tracking-tighter">
             Explore the <span className="text-primary">World</span>
           </h1>
           <p className="text-muted-foreground text-xl font-medium max-w-xl">
-            Discover the visual identity and historical journey of {COUNTRIES.length} nations across the globe.
+            Discover the visual identity and historical journey of nations across the globe, synced in real-time.
           </p>
         </div>
       </header>
@@ -84,12 +94,17 @@ export default function BrowsePage() {
       </div>
 
       <main className="container mx-auto px-4">
-        {filteredCountries.length > 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-32 space-y-4">
+            <Loader2 className="h-12 w-12 text-primary animate-spin" />
+            <p className="text-muted-foreground font-bold animate-pulse">Syncing world data...</p>
+          </div>
+        ) : filteredCountries.length > 0 ? (
           <div className="flag-grid">
             {filteredCountries.map((country) => (
               <FlagCard
-                key={country.code}
-                country={country}
+                key={country.id}
+                country={country as any}
               />
             ))}
           </div>
