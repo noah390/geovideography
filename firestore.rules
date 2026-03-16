@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * FLAGSPHERE SECURITY RULES - PROTOTYPING MODE
+     *
+     * Core Philosophy: This ruleset implements a public reference data model. The application 
+     * serves as a global atlas, providing static information about continents and countries.
+     *
+     * Data Structure:
+     * - /continents/{continentId}: Top-level collection for geographical regions.
+     * - /countries/{countryId}: Top-level collection for sovereign nations and their metadata.
+     *
+     * Key Security Decisions:
+     * - Public Read Access: All data is considered public and is accessible to both 
+     *   authenticated and anonymous/unauthenticated users to support wide discoverability.
+     * - Read-Only Enforcement: These collections are treated as managed reference data. 
+     *   Direct writes (create, update, delete) from the client SDK are strictly prohibited 
+     *   to maintain data integrity. Any data updates are expected to happen via administrative 
+     *   processes or Service Accounts.
+     * - Authorization Independence: Because all documents are public, no complex lookups 
+     *   or 'get()' calls are required within the rules, ensuring maximum performance.
+     */
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Rules for the Continents collection. Provides public geographical context.
+     * @path /continents/{continentId}
+     * @allow Public 'get' and 'list' for all users.
+     * @deny All write operations (create, update, delete) are prohibited for end-users.
+     * @principle Public Read with Restricted Writes.
+     */
+    match /continents/{continentId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Rules for the Countries collection. Contains flag URLs and country metadata.
+     * @path /countries/{countryId}
+     * @allow Public 'get' and 'list' for all users to browse flags and details.
+     * @deny All write operations (create, update, delete) are prohibited for end-users.
+     * @principle Public Read with Restricted Writes.
+     */
+    match /countries/{countryId} {
+      allow get, list: if true;
+      
+      // CRITICAL: Cannot implement owner-only writes as the 'Country' entity is missing an 'ownerId' or 'authorId' field.
+      // Per the reasoning provided, this data is intended to be read-only for the client application.
+      allow create, update, delete: if false; // TODO: Add administrative or ownership validation if client-side writes are ever required.
+    }
+
+  }
+}
