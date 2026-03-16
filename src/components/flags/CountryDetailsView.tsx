@@ -15,7 +15,8 @@ import {
   Map as MapIcon, 
   Landmark, 
   Flag,
-  ArrowLeft
+  ArrowLeft,
+  ChevronRight
 } from "lucide-react";
 
 interface CountryDetailsViewProps {
@@ -120,12 +121,15 @@ export function CountryDetailsView({ country }: CountryDetailsViewProps) {
             <Separator className="opacity-50" />
 
             <div className="space-y-8">
-              <StatItem 
-                icon={MapIcon} 
-                label="States / Provinces" 
-                value={country.statesCount.toString()} 
-                variant="compact"
-              />
+              <Link href={`/countries/${country.code.toLowerCase()}/states`} className="block group">
+                <StatItem 
+                  icon={MapIcon} 
+                  label="States / Provinces" 
+                  value={country.statesCount.toString()} 
+                  variant="compact"
+                  interactive
+                />
+              </Link>
               <StatItem 
                 icon={Landmark} 
                 label={country.name === "Nigeria" ? "Local Government Areas (LGAs)" : "Districts / Municipalities"} 
@@ -155,21 +159,33 @@ function StatItem({
   icon: Icon, 
   label, 
   value, 
-  variant = "default" 
+  variant = "default",
+  interactive = false
 }: { 
   icon: any, 
   label: string, 
   value: string,
-  variant?: "default" | "compact"
+  variant?: "default" | "compact",
+  interactive?: boolean
 }) {
   return (
-    <div className="flex items-start gap-5">
-      <div className={`p-4 ${variant === 'compact' ? 'bg-secondary/50' : 'bg-primary/5'} text-primary rounded-2xl shrink-0 shadow-sm border border-primary/10`}>
-        <Icon className="h-6 w-6" />
+    <div className={cn(
+      "flex items-start gap-5 transition-all",
+      interactive && "group-hover:translate-x-1"
+    )}>
+      <div className={cn(
+        "p-4 rounded-2xl shrink-0 shadow-sm border border-primary/10",
+        variant === 'compact' ? 'bg-secondary/50' : 'bg-primary/5',
+        interactive && "group-hover:bg-primary/10 group-hover:border-primary/20"
+      )}>
+        <Icon className="h-6 w-6 text-primary" />
       </div>
-      <div className="space-y-1">
+      <div className="space-y-1 flex-1">
         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{label}</p>
-        <p className={`${variant === 'compact' ? 'text-2xl' : 'text-3xl'} font-black text-foreground leading-tight tracking-tight`}>{value}</p>
+        <div className="flex items-center justify-between">
+          <p className={`${variant === 'compact' ? 'text-2xl' : 'text-3xl'} font-black text-foreground leading-tight tracking-tight`}>{value}</p>
+          {interactive && <ChevronRight className="h-5 w-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />}
+        </div>
       </div>
     </div>
   );
