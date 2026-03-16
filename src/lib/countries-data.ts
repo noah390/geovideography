@@ -25,7 +25,7 @@ export const COUNTRIES: Country[] = [
     flagUrl: "https://flagcdn.com/w320/ar.png",
     statesCount: 24,
     lgasCount: 527,
-    history: "Argentina's history dates back to indigenous civilizations before Spanish colonization began in the 16th century. It declared independence from Spain in 1816 following the May Revolution of 10. The nation went through periods of internal conflict before emerging as a major agricultural power in the late 19th and early 20th centuries."
+    history: "Argentina's history dates back to indigenous civilizations before Spanish colonization began in the 16th century. It declared independence from Spain in 1816 following the May Revolution of 1810. The nation went through periods of internal conflict before emerging as a major agricultural power in the late 19th and early 20th centuries."
   },
   { 
     name: "Australia", 
