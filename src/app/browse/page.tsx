@@ -2,10 +2,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { COUNTRIES, Country } from "@/lib/countries-data";
+import { COUNTRIES } from "@/lib/countries-data";
 import { Navbar } from "@/components/layout/Navbar";
 import { FlagCard } from "@/components/flags/FlagCard";
-import { CountryDetailsDialog } from "@/components/flags/CountryDetailsDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, Globe2 } from "lucide-react";
@@ -21,7 +20,6 @@ const CONTINENTS = ["All", "Africa", "Americas", "Asia", "Europe", "Oceania"] as
 export default function BrowsePage() {
   const [search, setSearch] = useState("");
   const [continent, setContinent] = useState<typeof CONTINENTS[number]>("All");
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
 
   const filteredCountries = useMemo(() => {
     return COUNTRIES.filter((c) => {
@@ -35,24 +33,28 @@ export default function BrowsePage() {
     <div className="min-h-screen bg-background pb-20">
       <Navbar />
       
-      <header className="py-12 px-4 container mx-auto">
-        <div className="max-w-3xl space-y-4">
-          <h1 className="text-4xl font-headline font-bold text-foreground">
-            Explore the World
+      <header className="py-20 px-4 container mx-auto">
+        <div className="max-w-3xl space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest">
+            <Globe2 className="h-3 w-3" />
+            <span>Global Database</span>
+          </div>
+          <h1 className="text-6xl font-headline font-black text-foreground tracking-tighter">
+            Explore the <span className="text-primary">World</span>
           </h1>
-          <p className="text-muted-foreground text-lg">
-            Discover {COUNTRIES.length} nations and territories through their vibrant flags and identities.
+          <p className="text-muted-foreground text-xl font-medium max-w-xl">
+            Discover the visual identity and historical journey of {COUNTRIES.length} nations across the globe.
           </p>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 sticky top-[65px] z-40 bg-background/95 py-4 mb-8">
+      <div className="container mx-auto px-4 sticky top-[65px] z-40 bg-background/95 backdrop-blur-md py-6 mb-12 border-b border-border/50">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
             <Input
-              placeholder="Search countries by name..."
-              className="pl-10 h-12 bg-card border-none shadow-sm focus:ring-primary"
+              placeholder="Search by country name..."
+              className="pl-12 h-14 bg-card border-none shadow-sm focus:ring-primary text-lg font-medium rounded-2xl"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -60,17 +62,17 @@ export default function BrowsePage() {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary" className="h-12 px-6 gap-2 bg-card border-none shadow-sm">
-                <Filter className="h-4 w-4" />
+              <Button variant="secondary" className="h-14 px-8 gap-3 bg-card border-none shadow-sm font-bold rounded-2xl">
+                <Filter className="h-5 w-5" />
                 {continent === "All" ? "All Continents" : continent}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl">
               {CONTINENTS.map((c) => (
                 <DropdownMenuItem 
                   key={c} 
                   onClick={() => setContinent(c)}
-                  className="flex items-center gap-2 cursor-pointer"
+                  className="flex items-center gap-3 cursor-pointer py-3 px-4 rounded-lg font-semibold"
                 >
                   <Globe2 className="h-4 w-4 opacity-70" />
                   {c}
@@ -88,29 +90,24 @@ export default function BrowsePage() {
               <FlagCard
                 key={country.code}
                 country={country}
-                onClick={setSelectedCountry}
               />
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 space-y-4">
-            <div className="bg-secondary w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="h-8 w-8 text-muted-foreground" />
+          <div className="text-center py-32 space-y-6">
+            <div className="bg-secondary/50 w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-4 border border-border">
+              <Search className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-headline font-semibold">No countries found</h3>
-            <p className="text-muted-foreground">Try adjusting your search or filter to find what you're looking for.</p>
-            <Button variant="outline" onClick={() => { setSearch(""); setContinent("All"); }}>
-              Reset Filters
+            <div className="space-y-2">
+              <h3 className="text-3xl font-headline font-black">No matches found</h3>
+              <p className="text-muted-foreground text-lg max-w-md mx-auto">Try adjusting your filters or search terms to explore different parts of the world.</p>
+            </div>
+            <Button variant="outline" size="lg" className="rounded-xl font-bold px-8" onClick={() => { setSearch(""); setContinent("All"); }}>
+              Clear All Filters
             </Button>
           </div>
         )}
       </main>
-
-      <CountryDetailsDialog
-        country={selectedCountry}
-        isOpen={!!selectedCountry}
-        onClose={() => setSelectedCountry(null)}
-      />
     </div>
   );
 }
