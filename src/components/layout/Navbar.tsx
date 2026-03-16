@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -23,7 +22,7 @@ export function Navbar() {
             <Globe className="text-primary-foreground h-5 w-5" />
           </div>
           <span className="font-headline font-bold text-xl tracking-tight text-primary">
-            FlagSphere
+            GeoJourney
           </span>
         </Link>
 

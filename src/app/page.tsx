@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -150,7 +149,7 @@ export default function Home() {
 
       <footer className="container mx-auto px-4 pt-10 border-t mt-20 text-center">
         <p className="text-muted-foreground text-sm">
-          &copy; {new Date().getFullYear()} FlagSphere. Built for global explorers.
+          &copy; {new Date().getFullYear()} GeoJourney. Built for global explorers.
         </p>
       </footer>
     </div>
