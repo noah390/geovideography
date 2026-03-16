@@ -35,6 +35,7 @@ export function CountryDetailsDialog({ country, isOpen, onClose }: CountryDetail
       <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden max-h-[90vh] flex flex-col bg-background border-none shadow-2xl">
         <DialogTitle className="sr-only">{country.name} Details</DialogTitle>
         
+        {/* Banner Section */}
         <div className="relative h-64 w-full shrink-0">
           <Image
             src={country.flagUrl}
@@ -56,8 +57,10 @@ export function CountryDetailsDialog({ country, isOpen, onClose }: CountryDetail
           </div>
         </div>
         
+        {/* Content Section */}
         <ScrollArea className="flex-1 w-full bg-background">
           <div className="p-8 space-y-10">
+            {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <StatItem 
@@ -101,6 +104,7 @@ export function CountryDetailsDialog({ country, isOpen, onClose }: CountryDetail
             
             <Separator className="opacity-50" />
 
+            {/* History Section */}
             <div className="space-y-6 pb-4">
               <div className="flex items-center gap-3 text-primary">
                 <div className="bg-primary/10 p-2 rounded-lg">
@@ -118,6 +122,7 @@ export function CountryDetailsDialog({ country, isOpen, onClose }: CountryDetail
           </div>
         </ScrollArea>
         
+        {/* Footer Actions */}
         <div className="p-6 pt-4 border-t flex justify-end shrink-0 bg-background/95 backdrop-blur-sm">
           <button
             onClick={onClose}
