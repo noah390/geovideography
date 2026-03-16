@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapPin, Users, Globe2, Building2, ScrollText } from "lucide-react";
+import { MapPin, Users, Globe2, Building2, ScrollText, Map, Landmark } from "lucide-react";
 
 interface CountryDetailsDialogProps {
   country: Country | null;
@@ -79,6 +79,26 @@ export function CountryDetailsDialog({ country, isOpen, onClose }: CountryDetail
                 <div>
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Population</p>
                   <p className="font-medium">{country.population.toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-secondary rounded-lg">
+                  <Map className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">States / Provinces</p>
+                  <p className="font-medium">{country.statesCount}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-secondary rounded-lg">
+                  <Landmark className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Districts / LGAs</p>
+                  <p className="font-medium">{country.lgasCount}</p>
                 </div>
               </div>
             </div>
