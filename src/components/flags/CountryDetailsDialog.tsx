@@ -1,6 +1,6 @@
+
 "use client";
 
-import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Country } from "@/lib/countries-data";
 import {
@@ -9,8 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapPin, Users, Globe2, Building2, ScrollText, Loader2 } from "lucide-react";
-import { getCountryHistory } from "@/ai/flows/get-country-history";
+import { MapPin, Users, Globe2, Building2, ScrollText } from "lucide-react";
 
 interface CountryDetailsDialogProps {
   country: Country | null;
@@ -19,23 +18,6 @@ interface CountryDetailsDialogProps {
 }
 
 export function CountryDetailsDialog({ country, isOpen, onClose }: CountryDetailsDialogProps) {
-  const [history, setHistory] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (country && isOpen) {
-      setIsLoading(true);
-      setHistory(null);
-      getCountryHistory({ countryName: country.name })
-        .then((res) => setHistory(res.history))
-        .catch((err) => {
-          console.error("Failed to fetch history:", err);
-          setHistory("Could not load historical context at this time.");
-        })
-        .finally(() => setIsLoading(false));
-    }
-  }, [country, isOpen]);
-
   if (!country) return null;
 
   return (
@@ -109,18 +91,11 @@ export function CountryDetailsDialog({ country, isOpen, onClose }: CountryDetail
                 <h3 className="text-lg font-bold font-headline">Historical Journey</h3>
               </div>
               
-              {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-12 space-y-3 opacity-60">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p className="text-sm font-medium">Researching nation history...</p>
-                </div>
-              ) : (
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {history || "Historical data for this country is currently unavailable."}
-                  </p>
-                </div>
-              )}
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {country.history}
+                </p>
+              </div>
             </div>
           </div>
         </ScrollArea>
