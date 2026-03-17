@@ -37,6 +37,14 @@ Since this project uses Next.js and Firebase, the best way to go live is using *
 6.  Follow the prompts to set up the backend. Firebase will automatically detect the `apphosting.yaml` file and deploy your Next.js app.
 7.  Once the build completes, you will receive a public URL for your live website!
 
+## 🎨 Customization
+
+### Adding your Favicon
+To use your custom logo as the browser icon:
+1. Save your image as `favicon.ico` or `icon.png`.
+2. Move that file into the `src/app/` directory.
+3. Next.js will automatically detect and serve it as the site favicon.
+
 ## Features
 - **Real-time Global Grid**: Syncs directly with high-fidelity Firestore archives.
 - **Archival Extraction**: Browse flags and statistics for nations worldwide in a sci-fi interface.
