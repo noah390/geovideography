@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Cpu, Search, BrainCircuit, Home, Zap } from "lucide-react";
+import { Search, BrainCircuit, Home, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -19,7 +19,19 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="bg-primary/20 rounded-sm p-1.5 transition-all group-hover:bg-primary/40 group-hover:scifi-glow">
-            <Cpu className="text-primary h-4 w-4 sm:h-5 sm:w-5 animate-pulse" />
+            {/* Custom high-tech 'G' logo inspired by the circuit theme */}
+            <svg
+              viewBox="0 0 24 24"
+              className="text-primary h-4 w-4 sm:h-5 sm:w-5 animate-pulse"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 8.5C16.8 6.5 14.5 5 12 5 8.1 5 5 8.1 5 12 5 15.9 8.1 19 12 19 15.9 19 19 15.9 19 12V12H12" />
+              <circle cx="12" cy="12" r="0.5" fill="currentColor" />
+            </svg>
           </div>
           <span className="font-headline font-black text-sm sm:text-lg md:text-xl tracking-widest text-primary scifi-text-glow truncate max-w-[120px] sm:max-w-none">
             GEOVIDEOGRAPHY
