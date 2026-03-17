@@ -12,7 +12,8 @@ import {
   Globe, 
   Navigation,
   MapPin,
-  Home
+  Home,
+  AlertTriangle
 } from "lucide-react";
 import { Loader } from "@googlemaps/js-api-loader";
 import { COUNTRIES } from "@/lib/countries-data";
@@ -21,6 +22,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { getStreetIntelligence, GetStreetIntelligenceOutput } from "@/ai/flows/get-street-intelligence";
 import { cn } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Hierarchical Navigation Types
 type NavLevel = "world" | "country" | "lga" | "town" | "street";
@@ -31,7 +33,7 @@ interface Breadcrumb {
   data?: any;
 }
 
-// Mock center coordinates for demo (In a real app, these come from Data Connect)
+// Mock center coordinates for demo
 const MOCK_COORD_MAP = COUNTRIES.map((c, i) => ({
   ...c,
   lat: [20, -25, -10, 56, 9, 37, 35, 26, 46, 51, 20, 41][i % 12],
@@ -44,14 +46,22 @@ export default function GlobalGridMap() {
   const [selectedData, setSelectedData] = useState<any>(null);
   const [streetIntel, setStreetIntel] = useState<GetStreetIntelligenceOutput | null>(null);
   const [isIntelLoading, setIsIntelLoading] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMap = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.Marker[]>([]);
 
   // Initialize Map
   useEffect(() => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+    if (!apiKey || apiKey === "YOUR_GOOGLE_MAPS_API_KEY") {
+      setMapError("Google Maps API key is missing. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env file.");
+      return;
+    }
+
     const loader = new Loader({
-      apiKey: "YOUR_GOOGLE_MAPS_API_KEY",
+      apiKey: apiKey,
       version: "weekly",
     });
 
@@ -65,6 +75,9 @@ export default function GlobalGridMap() {
       });
 
       renderMarkers();
+    }).catch(e => {
+      console.error("Map load error:", e);
+      setMapError("Failed to load Google Maps. Check your API key and network connection.");
     });
   }, []);
 
@@ -99,7 +112,6 @@ export default function GlobalGridMap() {
   }, [currentLevel]);
 
   const handleDrillDown = async (level: NavLevel, label: string, data: any) => {
-    // Update Hierarchy
     const newBreadcrumbs = [...breadcrumbs];
     const levelIndex = newBreadcrumbs.findIndex(b => b.level === level);
     
@@ -112,7 +124,6 @@ export default function GlobalGridMap() {
     setCurrentLevel(level);
     setSelectedData(data);
 
-    // Map Animations
     if (googleMap.current) {
       if (level === "country") {
         googleMap.current.panTo({ lat: data.lat, lng: data.lng });
@@ -120,7 +131,6 @@ export default function GlobalGridMap() {
       }
     }
 
-    // AI Enrichment for specific levels
     if (level === "street") {
       setIsIntelLoading(true);
       try {
@@ -182,6 +192,18 @@ export default function GlobalGridMap() {
       <div className="flex-1 relative flex">
         {/* Map Container */}
         <div ref={mapRef} className="flex-1 h-full w-full" />
+
+        {mapError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-[60] p-4">
+            <Alert variant="destructive" className="max-w-md bg-card border-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>API Configuration Error</AlertTitle>
+              <AlertDescription className="mt-2 text-xs font-mono">
+                {mapError}
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
 
         {/* Intelligence Sidebar */}
         <aside className={cn(
@@ -270,18 +292,18 @@ export default function GlobalGridMap() {
                           <Loader2 className="h-8 w-8 text-primary animate-spin" />
                           <p className="text-[10px] uppercase tracking-widest animate-pulse">Scanning Grid...</p>
                         </div>
-                      ) : streetIntel && (
+                      ) : streetIntel ? (
                         <div className="space-y-6">
                            <DashboardCard 
                              icon={Bus} 
                              label="Transit Access" 
-                             value={`${streetIntel.busStops} STOPS`} 
+                             value={streetIntel.isDataAvailable ? `${streetIntel.busStops} STOPS` : "N/A"} 
                              desc="Verified transit nodes."
                            />
                            <DashboardCard 
                              icon={Route} 
                              label="Surface Health" 
-                             value={streetIntel.roadHealth.toUpperCase()} 
+                             value={streetIntel.isDataAvailable ? streetIntel.roadHealth.toUpperCase() : "UNKNOWN"} 
                              desc="Structural pavement scan."
                            />
                            <div className="p-4 bg-primary/5 border border-primary/20 rounded-sm">
@@ -289,6 +311,10 @@ export default function GlobalGridMap() {
                                SYSTEM NOTE: {streetIntel.status}
                              </p>
                            </div>
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-destructive/10 border border-destructive/20 text-destructive text-[10px] uppercase font-bold text-center">
+                          Extraction Protocol Failed
                         </div>
                       )}
                     </div>
