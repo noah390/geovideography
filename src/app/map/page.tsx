@@ -1,16 +1,15 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
-import { Loader2, Map as MapIcon, Info, ChevronRight, Activity, TreeDeciduous, HeartPulse, Building2 } from "lucide-react";
+import { Loader2, Map as MapIcon, Info, ChevronRight, Activity, TreeDeciduous, HeartPulse, Building2, Bus, Road } from "lucide-react";
 import { Loader } from "@googlemaps/js-api-loader";
 import { COUNTRIES } from "@/lib/countries-data";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { getStreetIntel, StreetIntelOutput } from "@/ai/flows/street-intel-flow";
+import { getStreetIntelligence, GetStreetIntelligenceOutput } from "@/ai/flows/get-street-intelligence";
 import { cn } from "@/lib/utils";
 
 // Mock data extension for map coords
@@ -23,7 +22,7 @@ const MOCK_MAP_DATA = COUNTRIES.map(c => ({
 export default function GlobalGridMap() {
   const [selectedCountry, setSelectedCountry] = useState<any>(null);
   const [drillDown, setDrillDown] = useState<"country" | "street" | null>(null);
-  const [streetIntel, setStreetIntel] = useState<StreetIntelOutput | null>(null);
+  const [streetIntel, setStreetIntel] = useState<GetStreetIntelligenceOutput | null>(null);
   const [isIntelLoading, setIsIntelLoading] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -67,9 +66,10 @@ export default function GlobalGridMap() {
     setIsIntelLoading(true);
     setDrillDown("street");
     try {
-      const intel = await getStreetIntel({
-        streetName: "Main Neural Corridor 7",
-        locationContext: `${selectedCountry.capital}, ${selectedCountry.name}`,
+      // Use the new getStreetIntelligence flow with actual context
+      const intel = await getStreetIntelligence({
+        streetName: "Central Boulevard",
+        lgaName: selectedCountry?.name || "Global Grid",
       });
       setStreetIntel(intel);
     } catch (e) {
@@ -136,7 +136,7 @@ export default function GlobalGridMap() {
                       <div className="space-y-4">
                         <h3 className="text-[10px] font-mono font-black text-primary uppercase tracking-[0.3em]">Grid Navigation</h3>
                         <Button onClick={handleStreetDrillDown} className="w-full justify-between h-12 bg-primary/20 border border-primary/40 hover:bg-primary/30 text-primary font-black uppercase tracking-tighter rounded-sm group">
-                          Extract Street Intel <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          Extract Street Intelligence <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                         </Button>
                       </div>
                     </div>
@@ -155,47 +155,48 @@ export default function GlobalGridMap() {
                           </div>
                           <div>
                             <h3 className="text-sm font-headline font-black uppercase tracking-tighter">Street Telemetry</h3>
-                            <p className="text-[8px] font-mono text-muted-foreground">LOC: PRIMARY NEURAL CORRIDOR 7</p>
+                            <p className="text-[8px] font-mono text-muted-foreground uppercase">LOC: CENTRAL BOULEVARD GRID</p>
                           </div>
                         </div>
 
                         {isIntelLoading ? (
                           <div className="py-12 flex flex-col items-center justify-center space-y-4">
                             <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                            <p className="text-[10px] font-mono uppercase tracking-widest animate-pulse">Syncing Street Grid...</p>
+                            <p className="text-[10px] font-mono uppercase tracking-widest animate-pulse">Scanning Maps Database...</p>
                           </div>
                         ) : streetIntel && (
                           <div className="space-y-6">
-                            <DashboardCard 
-                              icon={TreeDeciduous} 
-                              label="Eco-Density" 
-                              value={`${streetIntel.analysis.greeneryScore}%`} 
-                              desc="Estimated tree count and canopy cover."
-                              progress={streetIntel.analysis.greeneryScore}
-                            />
-                            <DashboardCard 
-                              icon={Activity} 
-                              label="Road Health" 
-                              value="OPTIMAL" 
-                              desc={streetIntel.analysis.roadCondition}
-                              progress={85}
-                            />
-                            <DashboardCard 
-                              icon={HeartPulse} 
-                              label="Medical Proximity" 
-                              value="HIGH" 
-                              desc={streetIntel.analysis.healthFacilityAccess}
-                              progress={92}
-                            />
-                            <div className="p-4 bg-primary/5 border border-primary/20 rounded-sm space-y-2">
-                               <div className="flex items-center gap-2 text-accent">
-                                 <Building2 className="h-3 w-3" />
-                                 <span className="text-[10px] font-mono font-black uppercase tracking-widest">Safety Protocol</span>
-                               </div>
-                               <p className="text-[10px] text-muted-foreground leading-relaxed font-mono">
-                                 {streetIntel.analysis.safetyTelemetry}
-                               </p>
-                            </div>
+                            {!streetIntel.isDataAvailable ? (
+                              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-sm">
+                                <p className="text-[10px] font-mono font-bold text-destructive uppercase tracking-widest">
+                                  {streetIntel.status}
+                                </p>
+                              </div>
+                            ) : (
+                              <>
+                                <DashboardCard 
+                                  icon={Bus} 
+                                  label="Transit Access" 
+                                  value={`${streetIntel.busStops} STOPS`} 
+                                  desc="Verified bus stop infrastructure on this segment."
+                                />
+                                <DashboardCard 
+                                  icon={Road} 
+                                  label="Surface Health" 
+                                  value={streetIntel.roadHealth.toUpperCase()} 
+                                  desc="Structural pavement assessment via neural scan."
+                                />
+                                <div className="p-4 bg-primary/5 border border-primary/20 rounded-sm space-y-2">
+                                   <div className="flex items-center gap-2 text-accent">
+                                     <Building2 className="h-3 w-3" />
+                                     <span className="text-[10px] font-mono font-black uppercase tracking-widest">Grid Status</span>
+                                   </div>
+                                   <p className="text-[10px] text-muted-foreground leading-relaxed font-mono">
+                                     {streetIntel.status}
+                                   </p>
+                                </div>
+                              </>
+                            )}
                           </div>
                         )}
                       </div>
@@ -218,7 +219,7 @@ export default function GlobalGridMap() {
   );
 }
 
-function DashboardCard({ icon: Icon, label, value, desc, progress }: any) {
+function DashboardCard({ icon: Icon, label, value, desc }: any) {
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between">
@@ -228,7 +229,7 @@ function DashboardCard({ icon: Icon, label, value, desc, progress }: any) {
         </div>
         <span className="text-xs font-headline font-black text-primary scifi-text-glow">{value}</span>
       </div>
-      <Progress value={progress} className="h-1 bg-primary/10" />
+      <Progress value={75} className="h-1 bg-primary/10" />
       <p className="text-[9px] text-muted-foreground leading-relaxed font-medium">{desc}</p>
     </div>
   );
