@@ -1,44 +1,37 @@
-# Geovideography Deep-Grid Telemetry Schema
-# Powered by Firebase Data Connect & PostgreSQL
 
-# --- Global Sovereignty Layer ---
+# Geovideography Deep-Grid Schema
+# Hierarchy: Country -> LGA -> Town -> Street
 
 type Country @table {
   id: UUID! @default(expr: "uuid_generate_v4()")
-  name: String! @unique
+  name: String!
   flagUrl: String!
   history: String!
   population: Int!
+  continent: String!
+  lat: Float!
+  lng: Float!
 }
-
-# --- Administrative Hierarchy Layer ---
 
 type LGA @table {
   id: UUID! @default(expr: "uuid_generate_v4()")
   name: String!
-  country: Country! # FK to Country
+  country: Country!
 }
 
 type Town @table {
   id: UUID! @default(expr: "uuid_generate_v4()")
-  name: String! @searchable # High-speed lookup index
-  lga: LGA! # FK to LGA
+  name: String! @searchable
+  lga: LGA!
 }
-
-# --- Infrastructure Intelligence Layer ---
 
 type Street @table {
   id: UUID! @default(expr: "uuid_generate_v4()")
-  name: String! @searchable # High-speed lookup index
-  town: Town! # FK to Town
-  
-  # Telemetry Data
-  videoUrl: String # Drone/Satellite surveillance feed
-  treeCount: Int @default(value: 0)
-  roadConditionScore: Float # 0.0 to 1.0 (1.0 = Optimal)
-  healthIndex: Float # Calculated environmental health metric
-  
-  # Neural/Semantic Search Layer
-  # Vector embedding for AI-powered queries like "find leafy streets"
-  streetDescriptionEmbedding: Vector @size(768) 
+  name: String! @searchable
+  town: Town!
+  videoUrl: String
+  treeCount: Int
+  roadConditionScore: Float
+  healthIndex: Float
+  embedding: Vector @size(768)
 }

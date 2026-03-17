@@ -1,12 +1,14 @@
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, BrainCircuit, Home, Zap } from "lucide-react";
+import { Search, BrainCircuit, Home, Zap, Map as MapIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { name: "Terminal", href: "/", icon: Home },
+  { name: "Global Map", href: "/map", icon: MapIcon },
   { name: "Database", href: "/browse", icon: Search },
   { name: "Intel", href: "/quiz", icon: BrainCircuit },
 ];
@@ -19,7 +21,6 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="bg-primary/20 rounded-sm p-1.5 transition-all group-hover:bg-primary/40 group-hover:scifi-glow">
-            {/* Custom high-tech 'G' logo inspired by the circuit theme */}
             <svg
               viewBox="0 0 24 24"
               className="text-primary h-4 w-4 sm:h-5 sm:w-5 animate-pulse"
@@ -29,7 +30,7 @@ export function Navbar() {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M18 8.5C16.8 6.5 14.5 5 12 5 8.1 5 5 8.1 5 12 5 15.9 8.1 19 12 19 15.9 19 19 15.9 19 12V12H12" />
+              <path d="M18 8.5C16.8 6.5 14.5 5 12 5 8.1 5 5 8.1 5 12 5 15.9 8.1 19 12 19 15.9 19 19 12V12H12" />
               <circle cx="12" cy="12" r="0.5" fill="currentColor" />
             </svg>
           </div>
