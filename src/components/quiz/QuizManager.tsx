@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -26,11 +25,9 @@ export function QuizManager() {
     setSelectedOptionId(null);
     setIsCorrect(null);
 
-    // Pick a random country
     const correctIdx = Math.floor(Math.random() * COUNTRIES.length);
     const correctCountry = COUNTRIES[correctIdx];
 
-    // Pick 3 random distractor countries
     const distractors = COUNTRIES
       .filter((_, idx) => idx !== correctIdx)
       .sort(() => Math.random() - 0.5)
@@ -56,7 +53,6 @@ export function QuizManager() {
       setQuestionCount(prev => prev + 1);
     } catch (error) {
       console.error("Failed to generate question", error);
-      // Fallback or retry?
       setGameState("intro");
     }
   }
@@ -86,18 +82,18 @@ export function QuizManager() {
 
   if (gameState === "intro") {
     return (
-      <Card className="max-w-2xl mx-auto border-none shadow-xl overflow-hidden">
-        <div className="relative h-48 w-full bg-primary flex items-center justify-center overflow-hidden">
-          <BrainCircuit className="h-24 w-24 text-primary-foreground opacity-20 absolute -right-4 -bottom-4 rotate-12" />
-          <Trophy className="h-16 w-16 text-accent animate-bounce" />
+      <Card className="max-w-2xl mx-auto border-none shadow-xl overflow-hidden bg-card/50 backdrop-blur-sm">
+        <div className="relative h-40 md:h-48 w-full bg-primary flex items-center justify-center overflow-hidden">
+          <BrainCircuit className="h-20 w-20 md:h-24 md:w-24 text-primary-foreground opacity-20 absolute -right-4 -bottom-4 rotate-12" />
+          <Trophy className="h-12 w-12 md:h-16 md:w-16 text-accent animate-bounce" />
         </div>
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-headline font-bold">World Flag Quiz</CardTitle>
-          <p className="text-muted-foreground pt-2">Test your global knowledge! Can you identify these {TOTAL_QUESTIONS} countries correctly?</p>
+        <CardHeader className="text-center px-6 py-8">
+          <CardTitle className="text-2xl md:text-3xl font-headline font-black uppercase tracking-tight">Neural Flag Quiz</CardTitle>
+          <p className="text-muted-foreground text-sm sm:text-base pt-2 font-medium">Test your global recognition capabilities. Identify {TOTAL_QUESTIONS} targets correctly.</p>
         </CardHeader>
-        <CardContent className="flex justify-center p-8">
-          <Button onClick={restart} size="lg" className="px-12 h-14 text-lg font-bold gap-2">
-            Start Quiz <ArrowRight className="h-5 w-5" />
+        <CardContent className="flex justify-center p-6 md:p-8">
+          <Button onClick={restart} size="lg" className="w-full sm:w-auto px-12 h-14 text-lg font-bold gap-2 rounded-sm uppercase tracking-tighter scifi-glow">
+            Initiate Protocol <ArrowRight className="h-5 w-5" />
           </Button>
         </CardContent>
       </Card>
@@ -108,12 +104,12 @@ export function QuizManager() {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-6">
         <div className="relative">
-          <Loader2 className="h-16 w-16 text-primary animate-spin" />
-          <BrainCircuit className="h-8 w-8 text-accent absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+          <Loader2 className="h-12 w-12 md:h-16 md:w-16 text-primary animate-spin" />
+          <BrainCircuit className="h-6 w-6 md:h-8 md:w-8 text-accent absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
         </div>
         <div className="text-center space-y-2">
-          <h3 className="text-xl font-bold font-headline">Generating Question...</h3>
-          <p className="text-muted-foreground animate-pulse">Our AI is fetching a unique flag puzzle for you.</p>
+          <h3 className="text-lg md:text-xl font-bold font-headline uppercase tracking-widest">Compiling Question...</h3>
+          <p className="text-muted-foreground text-xs md:text-sm animate-pulse font-mono uppercase tracking-tighter">Accessing secure geographical archives</p>
         </div>
       </div>
     );
@@ -123,49 +119,50 @@ export function QuizManager() {
     const isAnswered = selectedOptionId !== null;
 
     return (
-      <div className="max-w-3xl mx-auto space-y-8">
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm font-medium">
-            <span>Question {questionCount} of {TOTAL_QUESTIONS}</span>
-            <span>Score: {score}</span>
+      <div className="max-w-3xl mx-auto space-y-6 md:space-y-8 px-2 sm:px-0">
+        <div className="space-y-3">
+          <div className="flex justify-between text-[10px] md:text-sm font-black font-mono uppercase tracking-widest text-primary">
+            <span>SEQUENCE {questionCount} / {TOTAL_QUESTIONS}</span>
+            <span>ACCURACY: {Math.round((score / Math.max(1, questionCount - 1)) * 100) || 0}%</span>
           </div>
-          <Progress value={(questionCount / TOTAL_QUESTIONS) * 100} className="h-2" />
+          <Progress value={(questionCount / TOTAL_QUESTIONS) * 100} className="h-1.5 md:h-2 bg-primary/20 rounded-none overflow-hidden" />
         </div>
 
-        <Card className="border-none shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center font-headline">
+        <Card className="border-primary/20 bg-card/40 backdrop-blur-md shadow-2xl rounded-none">
+          <CardHeader className="p-4 md:p-6 text-center">
+            <CardTitle className="text-lg sm:text-2xl font-headline font-black uppercase tracking-tight text-foreground leading-snug">
               {currentQuestion.questionText}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-8">
+          <CardContent className="p-4 md:p-8 space-y-6 md:space-y-8">
             <div className="flex justify-center">
               {typeof currentQuestion.promptContent[0] === 'string' ? (
-                <div className="text-5xl font-bold text-primary p-12 bg-secondary rounded-2xl w-full text-center">
+                <div className="text-3xl sm:text-5xl font-black text-primary p-8 md:p-12 bg-secondary/50 rounded-none w-full text-center border-2 border-primary/30 scifi-text-glow font-headline">
                   {currentQuestion.promptContent[0]}
                 </div>
               ) : (
-                <div className="relative h-64 w-full max-w-md overflow-hidden rounded-xl border shadow-inner bg-muted">
+                <div className="relative h-48 sm:h-64 w-full max-w-md overflow-hidden border-2 border-primary/30 shadow-inner bg-muted/20">
                   <Image
                     src={(currentQuestion.promptContent[0] as any).media.url}
                     alt="Quiz question target"
                     fill
-                    className="object-contain p-4"
+                    className="object-contain p-2 md:p-4"
                   />
+                  <div className="absolute inset-0 scifi-grid opacity-10 pointer-events-none" />
                 </div>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {currentQuestion.options.map((option) => {
                 const isSelected = selectedOptionId === option.id;
                 const isCorrectOption = option.id === currentQuestion.correctOptionId;
                 
-                let variantClass = "bg-card hover:bg-secondary border-2";
+                let variantClass = "bg-secondary/30 hover:bg-secondary/60 border-primary/10";
                 if (isAnswered) {
-                  if (isCorrectOption) variantClass = "bg-green-100 border-green-500 text-green-700 dark:bg-green-950 dark:text-green-300";
-                  else if (isSelected) variantClass = "bg-red-100 border-red-500 text-red-700 dark:bg-red-950 dark:text-red-300";
-                  else variantClass = "opacity-50 grayscale border-transparent";
+                  if (isCorrectOption) variantClass = "bg-green-500/20 border-green-500 text-green-300";
+                  else if (isSelected) variantClass = "bg-red-500/20 border-red-500 text-red-300";
+                  else variantClass = "opacity-40 grayscale border-transparent scale-95";
                 }
 
                 return (
@@ -174,34 +171,35 @@ export function QuizManager() {
                     disabled={isAnswered}
                     onClick={() => handleAnswer(option.id)}
                     className={cn(
-                      "p-6 rounded-xl transition-all flex items-center gap-4 text-left font-semibold text-lg",
-                      variantClass
+                      "p-4 md:p-6 border-2 transition-all flex items-center gap-3 md:gap-4 text-left font-black text-sm md:text-lg uppercase tracking-tighter",
+                      variantClass,
+                      !isAnswered && "hover:border-primary/50 hover:translate-x-1"
                     )}
                   >
                     {option.flagDataUri && (
-                      <div className="relative h-10 w-16 flex-shrink-0">
-                        <Image src={option.flagDataUri} alt={option.text} fill className="object-cover rounded shadow-sm" />
+                      <div className="relative h-8 w-12 md:h-10 md:w-16 flex-shrink-0">
+                        <Image src={option.flagDataUri} alt={option.text} fill className="object-cover rounded-sm shadow-sm" />
                       </div>
                     )}
-                    <span className="flex-1">{option.text}</span>
-                    {isAnswered && isCorrectOption && <CheckCircle2 className="h-6 w-6 text-green-500" />}
-                    {isAnswered && isSelected && !isCorrectOption && <XCircle className="h-6 w-6 text-red-500" />}
+                    <span className="flex-1 truncate">{option.text}</span>
+                    {isAnswered && isCorrectOption && <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-green-500" />}
+                    {isAnswered && isSelected && !isCorrectOption && <XCircle className="h-5 w-5 md:h-6 md:w-6 text-red-500" />}
                   </button>
                 );
               })}
             </div>
 
             {isAnswered && (
-              <div className="flex flex-col items-center pt-4 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="flex flex-col items-center pt-2 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className={cn(
-                  "px-6 py-3 rounded-full font-bold text-lg flex items-center gap-2",
-                  isCorrect ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                  "px-4 md:px-6 py-2 md:py-3 rounded-sm font-black text-xs md:text-lg flex items-center gap-2 uppercase tracking-widest border",
+                  isCorrect ? "bg-green-500/10 text-green-400 border-green-500/30" : "bg-red-500/10 text-red-400 border-red-500/30"
                 )}>
-                  {isCorrect ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
-                  {isCorrect ? "Brilliant! You're correct." : "Not quite! Keep going."}
+                  {isCorrect ? <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" /> : <XCircle className="h-4 w-4 md:h-5 md:w-5" />}
+                  {isCorrect ? "TARGET IDENTIFIED" : "IDENTIFICATION FAILURE"}
                 </div>
-                <Button onClick={handleNext} size="lg" className="px-10 h-12 gap-2">
-                  {questionCount >= TOTAL_QUESTIONS ? "See Results" : "Next Question"} <ArrowRight className="h-5 w-5" />
+                <Button onClick={handleNext} size="lg" className="w-full sm:w-auto px-10 h-12 gap-2 rounded-sm font-black uppercase tracking-tighter scifi-glow">
+                  {questionCount >= TOTAL_QUESTIONS ? "COMPUTE FINAL RESULTS" : "NEXT DATASET"} <ArrowRight className="h-5 w-5" />
                 </Button>
               </div>
             )}
@@ -214,26 +212,29 @@ export function QuizManager() {
   if (gameState === "result") {
     const percentage = (score / TOTAL_QUESTIONS) * 100;
     return (
-      <Card className="max-w-xl mx-auto border-none shadow-2xl overflow-hidden text-center">
-        <div className="bg-primary p-12 text-primary-foreground space-y-4">
-          <Trophy className="h-20 w-20 text-accent mx-auto" />
-          <h2 className="text-4xl font-headline font-bold">Quiz Complete!</h2>
-          <div className="text-6xl font-black">{score}/{TOTAL_QUESTIONS}</div>
-          <p className="text-primary-foreground/80 font-medium">You scored {percentage}%</p>
+      <Card className="max-w-xl mx-auto border-primary/30 shadow-2xl overflow-hidden text-center bg-card/60 backdrop-blur-lg rounded-none">
+        <div className="bg-primary/90 p-8 md:p-12 text-primary-foreground space-y-4 relative">
+          <div className="absolute inset-0 scifi-grid opacity-20 pointer-events-none" />
+          <Trophy className="h-16 w-16 md:h-20 md:w-20 text-accent mx-auto animate-pulse" />
+          <h2 className="text-3xl md:text-4xl font-headline font-black uppercase tracking-tighter">Sequence Complete</h2>
+          <div className="text-5xl md:text-7xl font-black scifi-text-glow">{score} / {TOTAL_QUESTIONS}</div>
+          <p className="text-primary-foreground/80 font-mono font-bold tracking-[0.3em] uppercase text-xs">Intelligence Quotient: {percentage}%</p>
         </div>
-        <CardContent className="p-10 space-y-8">
+        <CardContent className="p-6 md:p-10 space-y-8">
           <div className="space-y-2">
-            <h3 className="text-2xl font-bold font-headline">
-              {percentage === 100 ? "Flawless Victory!" : percentage >= 60 ? "Great Job!" : "Keep Practicing!"}
+            <h3 className="text-xl md:text-2xl font-black font-headline uppercase tracking-widest text-primary">
+              {percentage === 100 ? "OPTIMAL ACCURACY" : percentage >= 60 ? "SUFFICIENT PERFORMANCE" : "TRAINING REQUIRED"}
             </h3>
-            <p className="text-muted-foreground">Your knowledge of world flags is growing every day.</p>
+            <p className="text-muted-foreground font-medium text-sm md:text-base leading-relaxed">
+              Target recognition patterns analyzed. System synchronization improved.
+            </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button onClick={restart} size="lg" className="gap-2 px-8">
-              <RefreshCw className="h-5 w-5" /> Try Again
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+            <Button onClick={restart} size="lg" className="w-full sm:w-auto gap-2 px-8 rounded-sm uppercase tracking-tighter font-black scifi-glow">
+              <RefreshCw className="h-4 w-4" /> RESTART PROTOCOL
             </Button>
-            <Button variant="outline" size="lg" onClick={() => window.location.href = "/browse"} className="px-8">
-              Browse Flags
+            <Button variant="outline" size="lg" onClick={() => window.location.href = "/browse"} className="w-full sm:w-auto px-8 rounded-sm uppercase tracking-tighter font-black border-primary/30">
+              BROWSE ARCHIVES
             </Button>
           </div>
         </CardContent>

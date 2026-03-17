@@ -25,22 +25,22 @@ interface CountryDetailsViewProps {
 
 export function CountryDetailsView({ country }: CountryDetailsViewProps) {
   return (
-    <div className="max-w-5xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-5xl mx-auto space-y-8 md:space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 px-2 sm:px-4">
       {/* Navigation */}
-      <div className="flex items-center justify-between px-4">
+      <div className="flex items-center justify-between">
         <Link href="/browse">
-          <Button variant="ghost" className="gap-2 -ml-4 hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Back to Browse
+          <Button variant="ghost" className="gap-2 -ml-2 sm:-ml-4 hover:bg-primary/5 text-muted-foreground hover:text-primary transition-colors text-xs sm:text-sm">
+            <ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">Back to Browse</span><span className="sm:hidden">Back</span>
           </Button>
         </Link>
         <div className="flex items-center gap-2 text-primary font-bold">
-          <Flag className="h-5 w-5" />
-          <span className="tracking-widest uppercase text-xs">{country.code}</span>
+          <Flag className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="tracking-widest uppercase text-[10px] sm:text-xs">{country.code}</span>
         </div>
       </div>
 
       {/* Hero Header */}
-      <header className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden shadow-2xl border-8 border-white group">
+      <header className="relative w-full aspect-video md:aspect-[21/9] rounded-xl sm:rounded-[2rem] overflow-hidden shadow-2xl border-4 sm:border-8 border-white group">
         <Image
           src={country.flagUrl}
           alt={`${country.name} flag`}
@@ -49,22 +49,22 @@ export function CountryDetailsView({ country }: CountryDetailsViewProps) {
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        <div className="absolute bottom-10 left-10 space-y-2">
-          <h1 className="text-6xl md:text-8xl font-black text-white font-headline tracking-tighter drop-shadow-2xl">
+        <div className="absolute bottom-4 left-4 sm:bottom-10 sm:left-10 space-y-1 sm:space-y-2">
+          <h1 className="text-3xl sm:text-6xl md:text-8xl font-black text-white font-headline tracking-tighter drop-shadow-2xl">
             {country.name}
           </h1>
-          <p className="text-white/80 text-xl font-medium flex items-center gap-2">
-            <Globe2 className="h-5 w-5" /> {country.continent} &bull; {country.subregion}
+          <p className="text-white/80 text-xs sm:text-xl font-medium flex items-center gap-2">
+            <Globe2 className="h-3 w-3 sm:h-5 sm:w-5" /> {country.continent} <span className="hidden xs:inline">&bull; {country.subregion}</span>
           </p>
         </div>
       </header>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
         {/* Left Column: Stats */}
-        <div className="lg:col-span-2 space-y-12">
+        <div className="lg:col-span-2 space-y-8 md:space-y-12">
           {/* Quick Stats */}
-          <section className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
             <StatItem 
               icon={Building2} 
               label="Capital City" 
@@ -87,19 +87,19 @@ export function CountryDetailsView({ country }: CountryDetailsViewProps) {
             />
           </section>
 
-          <Separator className="opacity-50" />
+          <Separator className="opacity-30 md:opacity-50" />
 
           {/* History Section */}
-          <section className="space-y-6">
+          <section className="space-y-4 md:space-y-6">
             <div className="flex items-center gap-3 text-primary">
-              <div className="bg-primary/10 p-3 rounded-2xl">
-                <ScrollText className="h-8 w-8" />
+              <div className="bg-primary/10 p-2 sm:p-3 rounded-xl sm:rounded-2xl">
+                <ScrollText className="h-5 w-5 sm:h-8 sm:w-8" />
               </div>
-              <h2 className="text-3xl font-black font-headline tracking-tight">The Story of {country.name}</h2>
+              <h2 className="text-xl sm:text-3xl font-black font-headline tracking-tight">The Story of {country.name}</h2>
             </div>
             
-            <div className="prose prose-blue dark:prose-invert max-w-none">
-              <p className="text-muted-foreground text-xl leading-relaxed font-medium whitespace-pre-wrap italic">
+            <div className="prose prose-sm sm:prose-lg prose-blue dark:prose-invert max-w-none">
+              <p className="text-muted-foreground text-sm sm:text-xl leading-relaxed font-medium whitespace-pre-wrap italic">
                 {country.history}
               </p>
             </div>
@@ -107,20 +107,20 @@ export function CountryDetailsView({ country }: CountryDetailsViewProps) {
         </div>
 
         {/* Right Column: Admin Info */}
-        <aside className="space-y-8">
-          <div className="bg-card p-8 rounded-[2rem] shadow-lg border border-border/50 space-y-8 sticky top-24">
+        <aside className="space-y-6 md:space-y-8">
+          <div className="bg-card p-6 md:p-8 rounded-2xl md:rounded-[2rem] shadow-lg border border-border/50 space-y-6 md:space-y-8 lg:sticky lg:top-24">
             <div className="space-y-2">
-              <h3 className="text-sm font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
-                <Flag className="h-4 w-4" /> Administrative Structure
+              <h3 className="text-[10px] md:text-sm font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                <Flag className="h-3 w-3 md:h-4 md:w-4" /> Administrative Structure
               </h3>
-              <p className="text-muted-foreground text-sm font-medium">
+              <p className="text-muted-foreground text-[11px] md:text-sm font-medium">
                 Governance divisions within the territory of {country.name}.
               </p>
             </div>
 
-            <Separator className="opacity-50" />
+            <Separator className="opacity-30 md:opacity-50" />
 
-            <div className="space-y-8">
+            <div className="space-y-6 md:space-y-8">
               <Link href={`/countries/${country.code.toLowerCase()}/states`} className="block group">
                 <StatItem 
                   icon={MapIcon} 
@@ -138,9 +138,9 @@ export function CountryDetailsView({ country }: CountryDetailsViewProps) {
               />
             </div>
 
-            <div className="pt-4">
+            <div className="pt-2 md:pt-4">
               <Link href="/browse">
-                <Button className="w-full h-14 rounded-2xl font-bold shadow-lg shadow-primary/20">
+                <Button className="w-full h-12 md:h-14 rounded-xl md:rounded-2xl font-bold shadow-lg shadow-primary/20 text-xs md:text-base">
                   Explore More Nations
                 </Button>
               </Link>
@@ -150,7 +150,7 @@ export function CountryDetailsView({ country }: CountryDetailsViewProps) {
       </div>
 
       {/* Footer Padding */}
-      <div className="h-20" />
+      <div className="h-10 md:h-20" />
     </div>
   );
 }
@@ -170,21 +170,24 @@ function StatItem({
 }) {
   return (
     <div className={cn(
-      "flex items-start gap-5 transition-all",
+      "flex items-start gap-3 sm:gap-5 transition-all w-full",
       interactive && "group-hover:translate-x-1"
     )}>
       <div className={cn(
-        "p-4 rounded-2xl shrink-0 shadow-sm border border-primary/10",
+        "p-3 sm:p-4 rounded-xl sm:rounded-2xl shrink-0 shadow-sm border border-primary/10",
         variant === 'compact' ? 'bg-secondary/50' : 'bg-primary/5',
         interactive && "group-hover:bg-primary/10 group-hover:border-primary/20"
       )}>
-        <Icon className="h-6 w-6 text-primary" />
+        <Icon className="h-4 w-4 sm:h-6 sm:w-6 text-primary" />
       </div>
-      <div className="space-y-1 flex-1">
-        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{label}</p>
-        <div className="flex items-center justify-between">
-          <p className={`${variant === 'compact' ? 'text-2xl' : 'text-3xl'} font-black text-foreground leading-tight tracking-tight`}>{value}</p>
-          {interactive && <ChevronRight className="h-5 w-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />}
+      <div className="space-y-0.5 sm:space-y-1 flex-1 overflow-hidden">
+        <p className="text-[8px] sm:text-[10px] font-black text-muted-foreground uppercase tracking-[0.1em] sm:tracking-[0.2em] truncate">{label}</p>
+        <div className="flex items-center justify-between gap-2">
+          <p className={cn(
+            "font-black text-foreground leading-tight tracking-tight truncate",
+            variant === 'compact' ? 'text-lg sm:text-2xl' : 'text-xl sm:text-3xl'
+          )}>{value}</p>
+          {interactive && <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />}
         </div>
       </div>
     </div>

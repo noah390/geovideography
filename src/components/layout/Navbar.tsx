@@ -19,9 +19,9 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="bg-primary/20 rounded-sm p-1.5 transition-all group-hover:bg-primary/40 group-hover:scifi-glow">
-            <Cpu className="text-primary h-5 w-5 animate-pulse" />
+            <Cpu className="text-primary h-4 w-4 sm:h-5 sm:w-5 animate-pulse" />
           </div>
-          <span className="font-headline font-black text-xl tracking-widest text-primary scifi-text-glow">
+          <span className="font-headline font-black text-sm sm:text-lg md:text-xl tracking-widest text-primary scifi-text-glow truncate max-w-[120px] sm:max-w-none">
             GEOVIDEOGRAPHY
           </span>
         </Link>
@@ -32,18 +32,18 @@ export function Navbar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-bold transition-all border border-transparent",
+                "flex items-center gap-2 px-2 sm:px-4 py-2 rounded-sm text-[10px] sm:text-xs font-bold transition-all border border-transparent",
                 pathname === item.href
                   ? "text-primary bg-primary/10 border-primary/30 shadow-[0_0_10px_rgba(0,255,255,0.1)]"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               )}
             >
               <item.icon className="h-3 w-3" />
-              <span className="hidden sm:inline uppercase tracking-tighter">{item.name}</span>
+              <span className="hidden xs:inline uppercase tracking-tighter">{item.name}</span>
             </Link>
           ))}
-          <div className="h-4 w-[1px] bg-border mx-2" />
-          <Zap className="h-4 w-4 text-accent animate-bounce" />
+          <div className="hidden xs:block h-4 w-[1px] bg-border mx-1 sm:mx-2" />
+          <Zap className="hidden xs:block h-4 w-4 text-accent animate-bounce" />
         </div>
       </div>
     </nav>
