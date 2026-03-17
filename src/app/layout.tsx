@@ -1,5 +1,6 @@
 import type {Metadata} from 'next';
 import './globals.css';
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'Geovideography',
@@ -21,7 +22,9 @@ export default function RootLayout({
       <body className="font-body antialiased bg-background text-foreground selection:bg-primary/30">
         <div className="fixed inset-0 bg-grid-slate-900/[0.04] bg-[bottom_1px_center] border-b border-slate-100/5 -z-10" />
         <div className="fixed inset-0 bg-gradient-to-t from-background via-transparent to-transparent -z-10" />
-        {children}
+        <FirebaseClientProvider>
+          {children}
+        </FirebaseClientProvider>
       </body>
     </html>
   );
