@@ -2,204 +2,295 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
-import { Loader2, Map as MapIcon, Info, ChevronRight, Activity, TreeDeciduous, HeartPulse, Building2, Bus, Road } from "lucide-react";
+import { 
+  Loader2, 
+  Map as MapIcon, 
+  ChevronRight, 
+  Activity, 
+  Bus, 
+  Route, 
+  Globe, 
+  Navigation,
+  MapPin,
+  Home
+} from "lucide-react";
 import { Loader } from "@googlemaps/js-api-loader";
 import { COUNTRIES } from "@/lib/countries-data";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { getStreetIntelligence, GetStreetIntelligenceOutput } from "@/ai/flows/get-street-intelligence";
 import { cn } from "@/lib/utils";
 
-// Mock data extension for map coords
-const MOCK_MAP_DATA = COUNTRIES.map(c => ({
+// Hierarchical Navigation Types
+type NavLevel = "world" | "country" | "lga" | "town" | "street";
+
+interface Breadcrumb {
+  level: NavLevel;
+  label: string;
+  data?: any;
+}
+
+// Mock center coordinates for demo (In a real app, these come from Data Connect)
+const MOCK_COORD_MAP = COUNTRIES.map((c, i) => ({
   ...c,
-  lat: Math.random() * 120 - 60,
-  lng: Math.random() * 240 - 120,
+  lat: [20, -25, -10, 56, 9, 37, 35, 26, 46, 51, 20, 41][i % 12],
+  lng: [0, 133, -50, -106, 8, -95, 104, 30, 2, 10, 78, 12][i % 12],
 }));
 
 export default function GlobalGridMap() {
-  const [selectedCountry, setSelectedCountry] = useState<any>(null);
-  const [drillDown, setDrillDown] = useState<"country" | "street" | null>(null);
+  const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([{ level: "world", label: "World" }]);
+  const [currentLevel, setCurrentLevel] = useState<NavLevel>("world");
+  const [selectedData, setSelectedData] = useState<any>(null);
   const [streetIntel, setStreetIntel] = useState<GetStreetIntelligenceOutput | null>(null);
   const [isIntelLoading, setIsIntelLoading] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
+  const googleMap = useRef<google.maps.Map | null>(null);
+  const markers = useRef<google.maps.Marker[]>([]);
 
+  // Initialize Map
   useEffect(() => {
     const loader = new Loader({
-      apiKey: "YOUR_GOOGLE_MAPS_API_KEY", // Replace with real key
+      apiKey: "YOUR_GOOGLE_MAPS_API_KEY",
       version: "weekly",
     });
 
     loader.load().then((google) => {
       if (!mapRef.current) return;
-      const map = new google.maps.Map(mapRef.current, {
+      googleMap.current = new google.maps.Map(mapRef.current, {
         center: { lat: 20, lng: 0 },
         zoom: 3,
         styles: sciFiMapStyles,
         disableDefaultUI: true,
       });
 
-      MOCK_MAP_DATA.forEach((country) => {
-        const marker = new google.maps.Marker({
-          position: { lat: country.lat, lng: country.lng },
-          map,
-          title: country.name,
-          icon: {
-            url: country.flagUrl,
-            scaledSize: new google.maps.Size(30, 20),
-          },
-        });
-
-        marker.addListener("click", () => {
-          setSelectedCountry(country);
-          setDrillDown("country");
-          map.panTo({ lat: country.lat, lng: country.lng });
-          map.setZoom(5);
-        });
-      });
+      renderMarkers();
     });
   }, []);
 
-  const handleStreetDrillDown = async () => {
-    setIsIntelLoading(true);
-    setDrillDown("street");
-    try {
-      // Use the new getStreetIntelligence flow with actual context
-      const intel = await getStreetIntelligence({
-        streetName: "Central Boulevard",
-        lgaName: selectedCountry?.name || "Global Grid",
+  const renderMarkers = () => {
+    if (!googleMap.current) return;
+
+    // Clear existing markers
+    markers.current.forEach(m => m.setMap(null));
+    markers.current = [];
+
+    if (currentLevel === "world") {
+      MOCK_COORD_MAP.forEach((country) => {
+        const marker = new google.maps.Marker({
+          position: { lat: country.lat, lng: country.lng },
+          map: googleMap.current,
+          title: country.name,
+          icon: {
+            url: country.flagUrl,
+            scaledSize: new google.maps.Size(40, 26),
+          },
+          animation: google.maps.Animation.DROP,
+        });
+
+        marker.addListener("click", () => handleDrillDown("country", country.name, country));
+        markers.current.push(marker);
       });
-      setStreetIntel(intel);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsIntelLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    renderMarkers();
+  }, [currentLevel]);
+
+  const handleDrillDown = async (level: NavLevel, label: string, data: any) => {
+    // Update Hierarchy
+    const newBreadcrumbs = [...breadcrumbs];
+    const levelIndex = newBreadcrumbs.findIndex(b => b.level === level);
+    
+    if (levelIndex !== -1) {
+      newBreadcrumbs.splice(levelIndex);
+    }
+    newBreadcrumbs.push({ level, label, data });
+    
+    setBreadcrumbs(newBreadcrumbs);
+    setCurrentLevel(level);
+    setSelectedData(data);
+
+    // Map Animations
+    if (googleMap.current) {
+      if (level === "country") {
+        googleMap.current.panTo({ lat: data.lat, lng: data.lng });
+        googleMap.current.setZoom(12);
+      }
+    }
+
+    // AI Enrichment for specific levels
+    if (level === "street") {
+      setIsIntelLoading(true);
+      try {
+        const intel = await getStreetIntelligence({
+          streetName: label,
+          lgaName: breadcrumbs.find(b => b.level === "lga")?.label || "Unknown LGA",
+        });
+        setStreetIntel(intel);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsIntelLoading(false);
+      }
+    }
+  };
+
+  const navigateToLevel = (index: number) => {
+    const target = breadcrumbs[index];
+    setBreadcrumbs(breadcrumbs.slice(0, index + 1));
+    setCurrentLevel(target.level);
+    setSelectedData(target.data || null);
+
+    if (googleMap.current) {
+      if (target.level === "world") {
+        googleMap.current.setZoom(3);
+        googleMap.current.panTo({ lat: 20, lng: 0 });
+      } else if (target.level === "country") {
+        googleMap.current.setZoom(12);
+        googleMap.current.panTo({ lat: target.data.lat, lng: target.data.lng });
+      }
     }
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-background overflow-hidden">
+    <div className="h-screen w-screen flex flex-col bg-background overflow-hidden font-mono">
       <Navbar />
       
+      {/* Breadcrumb Navigation */}
+      <div className="bg-card/40 backdrop-blur-md border-b border-primary/20 px-4 py-2 flex items-center gap-2 overflow-x-auto no-scrollbar">
+        {breadcrumbs.map((crumb, idx) => (
+          <div key={crumb.level} className="flex items-center gap-2 shrink-0">
+            {idx > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground" />}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigateToLevel(idx)}
+              className={cn(
+                "h-8 px-2 text-[10px] uppercase tracking-widest font-black rounded-sm",
+                idx === breadcrumbs.length - 1 ? "text-primary bg-primary/10 border border-primary/30" : "text-muted-foreground hover:text-primary"
+              )}
+            >
+              {crumb.level === "world" ? <Globe className="h-3 w-3 mr-1" /> : crumb.level === "country" ? <Navigation className="h-3 w-3 mr-1" /> : <MapPin className="h-3 w-3 mr-1" />}
+              {crumb.label}
+            </Button>
+          </div>
+        ))}
+      </div>
+
       <div className="flex-1 relative flex">
         {/* Map Container */}
         <div ref={mapRef} className="flex-1 h-full w-full" />
 
         {/* Intelligence Sidebar */}
         <aside className={cn(
-          "absolute top-4 right-4 bottom-4 w-96 bg-card/80 backdrop-blur-xl border border-primary/20 shadow-2xl transition-transform duration-500 z-50 rounded-sm overflow-hidden flex flex-col",
-          selectedCountry ? "translate-x-0" : "translate-x-[calc(100%+20px)]"
+          "absolute top-4 right-4 bottom-4 w-80 md:w-96 bg-card/80 backdrop-blur-xl border border-primary/20 shadow-2xl transition-transform duration-500 z-50 rounded-sm overflow-hidden flex flex-col",
+          currentLevel !== "world" ? "translate-x-0" : "translate-x-[calc(100%+20px)]"
         )}>
-          {selectedCountry && (
+          {selectedData && (
             <>
               <div className="p-6 bg-primary/10 border-b border-primary/20 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="relative h-8 w-12 rounded-sm overflow-hidden border border-white/20">
-                    <img src={selectedCountry.flagUrl} alt="flag" className="object-cover h-full w-full" />
-                  </div>
-                  <h2 className="font-headline font-black text-lg tracking-tighter uppercase">{selectedCountry.name}</h2>
+                  {selectedData.flagUrl && (
+                    <div className="relative h-6 w-9 rounded-sm overflow-hidden border border-white/20">
+                      <img src={selectedData.flagUrl} alt="flag" className="object-cover h-full w-full" />
+                    </div>
+                  )}
+                  <h2 className="font-headline font-black text-sm tracking-tighter uppercase truncate max-w-[150px]">{selectedData.name || selectedData.label}</h2>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setSelectedCountry(null)} className="h-8 w-8 text-primary">
+                <Button variant="ghost" size="icon" onClick={() => navigateToLevel(0)} className="h-8 w-8 text-primary">
                   ×
                 </Button>
               </div>
 
               <ScrollArea className="flex-1">
                 <div className="p-6 space-y-6">
-                  {drillDown === "country" && (
+                  {currentLevel === "country" && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-secondary/40 p-3 rounded-sm border border-white/5">
-                          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Population</p>
-                          <p className="text-sm font-black text-primary">{selectedCountry.population.toLocaleString()}</p>
-                        </div>
-                        <div className="bg-secondary/40 p-3 rounded-sm border border-white/5">
-                          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Capital</p>
-                          <p className="text-sm font-black text-primary">{selectedCountry.capital}</p>
-                        </div>
+                      <div className="bg-secondary/40 p-4 rounded-sm border border-white/5 space-y-2">
+                         <h3 className="text-[10px] font-black text-primary uppercase tracking-widest">Administrative Grid</h3>
+                         <div className="grid gap-2">
+                           <Button 
+                             onClick={() => handleDrillDown("lga", "Central District", {})}
+                             variant="outline" 
+                             className="w-full justify-start h-10 text-[10px] uppercase border-primary/20 hover:bg-primary/10 rounded-none"
+                           >
+                             <Home className="h-3 w-3 mr-2 text-primary" /> View LGAs
+                           </Button>
+                         </div>
                       </div>
-
+                      
                       <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-primary">
-                          <Info className="h-4 w-4" />
-                          <h3 className="text-xs font-headline font-black uppercase tracking-widest">Archival History</h3>
-                        </div>
-                        <p className="text-xs text-muted-foreground font-mono leading-relaxed italic">
-                          {selectedCountry.history}
+                        <p className="text-[10px] text-muted-foreground leading-relaxed italic">
+                          {selectedData.history}
                         </p>
-                      </div>
-
-                      <Separator className="bg-primary/20" />
-
-                      <div className="space-y-4">
-                        <h3 className="text-[10px] font-mono font-black text-primary uppercase tracking-[0.3em]">Grid Navigation</h3>
-                        <Button onClick={handleStreetDrillDown} className="w-full justify-between h-12 bg-primary/20 border border-primary/40 hover:bg-primary/30 text-primary font-black uppercase tracking-tighter rounded-sm group">
-                          Extract Street Intelligence <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </Button>
                       </div>
                     </div>
                   )}
 
-                  {drillDown === "street" && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                      <Button variant="link" onClick={() => setDrillDown("country")} className="p-0 h-auto text-[10px] font-mono text-primary uppercase tracking-widest">
-                        ← Back to Country
-                      </Button>
-
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 bg-primary/20 flex items-center justify-center rounded-sm">
-                            <Activity className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-headline font-black uppercase tracking-tighter">Street Telemetry</h3>
-                            <p className="text-[8px] font-mono text-muted-foreground uppercase">LOC: CENTRAL BOULEVARD GRID</p>
-                          </div>
-                        </div>
-
-                        {isIntelLoading ? (
-                          <div className="py-12 flex flex-col items-center justify-center space-y-4">
-                            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                            <p className="text-[10px] font-mono uppercase tracking-widest animate-pulse">Scanning Maps Database...</p>
-                          </div>
-                        ) : streetIntel && (
-                          <div className="space-y-6">
-                            {!streetIntel.isDataAvailable ? (
-                              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-sm">
-                                <p className="text-[10px] font-mono font-bold text-destructive uppercase tracking-widest">
-                                  {streetIntel.status}
-                                </p>
-                              </div>
-                            ) : (
-                              <>
-                                <DashboardCard 
-                                  icon={Bus} 
-                                  label="Transit Access" 
-                                  value={`${streetIntel.busStops} STOPS`} 
-                                  desc="Verified bus stop infrastructure on this segment."
-                                />
-                                <DashboardCard 
-                                  icon={Road} 
-                                  label="Surface Health" 
-                                  value={streetIntel.roadHealth.toUpperCase()} 
-                                  desc="Structural pavement assessment via neural scan."
-                                />
-                                <div className="p-4 bg-primary/5 border border-primary/20 rounded-sm space-y-2">
-                                   <div className="flex items-center gap-2 text-accent">
-                                     <Building2 className="h-3 w-3" />
-                                     <span className="text-[10px] font-mono font-black uppercase tracking-widest">Grid Status</span>
-                                   </div>
-                                   <p className="text-[10px] text-muted-foreground leading-relaxed font-mono">
-                                     {streetIntel.status}
-                                   </p>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        )}
+                  {currentLevel === "lga" && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+                      <h3 className="text-[10px] font-black text-primary uppercase tracking-widest">Towns & Estates</h3>
+                      <div className="grid gap-2">
+                        {["Neon Heights", "Silicon Valley", "Cyber Port"].map(town => (
+                          <Button 
+                            key={town}
+                            onClick={() => handleDrillDown("town", town, {})}
+                            className="w-full justify-between h-10 text-[10px] bg-secondary/40 border border-white/5 hover:bg-primary/20 rounded-none"
+                          >
+                            {town} <ChevronRight className="h-3 w-3" />
+                          </Button>
+                        ))}
                       </div>
+                    </div>
+                  )}
+
+                  {currentLevel === "town" && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+                      <h3 className="text-[10px] font-black text-primary uppercase tracking-widest">Street Telemetry Grid</h3>
+                      <div className="grid gap-2">
+                        {["Main Circuit", "Data Way", "Logic Lane"].map(street => (
+                          <Button 
+                            key={street}
+                            onClick={() => handleDrillDown("street", street, {})}
+                            className="w-full justify-between h-10 text-[10px] bg-primary/10 border border-primary/30 hover:bg-primary/20 rounded-none"
+                          >
+                            {street} <Activity className="h-3 w-3" />
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {currentLevel === "street" && (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+                      {isIntelLoading ? (
+                        <div className="py-20 flex flex-col items-center justify-center space-y-4">
+                          <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                          <p className="text-[10px] uppercase tracking-widest animate-pulse">Scanning Grid...</p>
+                        </div>
+                      ) : streetIntel && (
+                        <div className="space-y-6">
+                           <DashboardCard 
+                             icon={Bus} 
+                             label="Transit Access" 
+                             value={`${streetIntel.busStops} STOPS`} 
+                             desc="Verified transit nodes."
+                           />
+                           <DashboardCard 
+                             icon={Route} 
+                             label="Surface Health" 
+                             value={streetIntel.roadHealth.toUpperCase()} 
+                             desc="Structural pavement scan."
+                           />
+                           <div className="p-4 bg-primary/5 border border-primary/20 rounded-sm">
+                             <p className="text-[9px] text-muted-foreground leading-relaxed uppercase">
+                               SYSTEM NOTE: {streetIntel.status}
+                             </p>
+                           </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -208,10 +299,10 @@ export default function GlobalGridMap() {
           )}
         </aside>
 
-        {/* Legend Overlay */}
-        <div className="absolute bottom-4 left-4 p-4 bg-card/80 backdrop-blur-md border border-primary/20 rounded-sm z-40 hidden md:block">
-          <div className="flex items-center gap-2 text-primary font-mono text-[10px] font-black uppercase tracking-[0.2em]">
-            <MapIcon className="h-4 w-4" /> Global Intelligence Grid Active
+        {/* Map Legend */}
+        <div className="absolute bottom-4 left-4 p-3 bg-card/80 backdrop-blur-md border border-primary/20 rounded-sm z-40 hidden md:block">
+          <div className="flex items-center gap-2 text-primary font-mono text-[9px] font-black uppercase tracking-[0.2em]">
+            <Activity className="h-3 w-3 animate-pulse" /> GLOBAL GRID ACTIVE: {currentLevel.toUpperCase()}
           </div>
         </div>
       </div>
@@ -221,16 +312,16 @@ export default function GlobalGridMap() {
 
 function DashboardCard({ icon: Icon, label, value, desc }: any) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-primary" />
-          <span className="text-[10px] font-mono font-black text-muted-foreground uppercase tracking-widest">{label}</span>
+          <Icon className="h-3 w-3 text-primary" />
+          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">{label}</span>
         </div>
-        <span className="text-xs font-headline font-black text-primary scifi-text-glow">{value}</span>
+        <span className="text-[10px] font-black text-primary scifi-text-glow">{value}</span>
       </div>
-      <Progress value={75} className="h-1 bg-primary/10" />
-      <p className="text-[9px] text-muted-foreground leading-relaxed font-medium">{desc}</p>
+      <Progress value={85} className="h-0.5 bg-primary/10" />
+      <p className="text-[8px] text-muted-foreground leading-relaxed">{desc}</p>
     </div>
   );
 }
@@ -241,8 +332,7 @@ const sciFiMapStyles = [
   { elementType: "labels.text.fill", stylers: [{ color: "#00f2ff" }] },
   { featureType: "administrative.country", elementType: "geometry.stroke", stylers: [{ color: "#00f2ff" }, { weight: 1 }] },
   { featureType: "water", elementType: "geometry", stylers: [{ color: "#000b1a" }] },
-  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#004060" }] },
-  { featureType: "road", stylers: [{ visibility: "off" }] },
+  { featureType: "road", stylers: [{ visibility: "on" }, { color: "#001a33" }] },
+  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#006699" }] },
   { featureType: "poi", stylers: [{ visibility: "off" }] },
-  { featureType: "transit", stylers: [{ visibility: "off" }] },
 ];
