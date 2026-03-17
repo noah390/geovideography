@@ -1,6 +1,6 @@
-# GeoJourney 🌍
+# Geovideography 🌌
 
-GeoJourney is a real-time global atlas where you can explore world flags, national histories, and administrative structures.
+Geovideography is a high-tech global atlas and intelligence terminal where you can extract world flags, national histories, and administrative structures from the global grid.
 
 ## 🚀 How to Go Live on GitHub
 
@@ -20,7 +20,7 @@ git remote add origin https://github.com/noah390/geovideography.git
 git add .
 
 # Create your first commit
-git commit -m "Initial commit: GeoJourney App"
+git commit -m "Initial commit: Geovideography Protocol"
 
 # Push to the main branch
 git push -u origin main
@@ -38,15 +38,15 @@ Since this project uses Next.js and Firebase, the best way to go live is using *
 7.  Once the build completes, you will receive a public URL for your live website!
 
 ## Features
-- **Real-time Data**: Syncs directly with Firestore.
-- **Global Atlas**: Browse flags and statistics for nations worldwide.
-- **Deep History**: Explore the "Historical Journey" of every country.
-- **Administrative Breakdown**: View state-level details and flags for regions.
-- **AI-Powered Quiz**: Test your flag knowledge with dynamic questions.
+- **Real-time Global Grid**: Syncs directly with high-fidelity Firestore archives.
+- **Archival Extraction**: Browse flags and statistics for nations worldwide in a sci-fi interface.
+- **Neural History**: Explore the "Historical Lore" of every country.
+- **Telemetry Breakdown**: View state-level details and flags for regions.
+- **AI-Powered Intel Quiz**: Test your flag knowledge with dynamic, neural-adaptive questions.
 
 ## Tech Stack
 - **Framework**: Next.js 15 (App Router)
 - **Database**: Firebase Firestore
 - **Auth**: Firebase Authentication
 - **AI**: Genkit (Google Gemini)
-- **Styling**: Tailwind CSS & ShadCN UI
+- **Styling**: Tailwind CSS & ShadCN UI (Cyber Theme)
