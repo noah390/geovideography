@@ -1,31 +1,59 @@
 {
   "entities": {
     "Country": {
-      "title": "Country",
+      "title": "Sovereign Nation",
       "type": "object",
-      "description": "Sovereign nation data.",
+      "description": "Top-level national dataset.",
       "properties": {
+        "id": { "type": "string", "format": "uuid" },
         "name": { "type": "string" },
         "flagUrl": { "type": "string", "format": "uri" },
-        "history": { "type": "string" },
-        "population": { "type": "number" }
+        "historySummary": { "type": "string" },
+        "populationCount": { "type": "integer" }
+      }
+    },
+    "LGA": {
+      "title": "Local Government Area",
+      "type": "object",
+      "description": "Administrative division within a country.",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" },
+        "countryId": { "type": "string", "format": "uuid" }
+      }
+    },
+    "Town": {
+      "title": "Town / Estate",
+      "type": "object",
+      "description": "Urban or residential node.",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" },
+        "lgaId": { "type": "string", "format": "uuid" }
       }
     },
     "Street": {
       "title": "Street Telemetry",
       "type": "object",
-      "description": "Granular infrastructure intelligence.",
+      "description": "Granular infrastructure intelligence node.",
       "properties": {
+        "id": { "type": "string", "format": "uuid" },
         "name": { "type": "string" },
-        "treeCount": { "type": "number" },
-        "roadConditionScore": { "type": "number" },
-        "healthIndex": { "type": "number" },
-        "videoUrl": { "type": "string" }
+        "townId": { "type": "string", "format": "uuid" },
+        "videoUrl": { "type": "string", "format": "uri" },
+        "treeCount": { "type": "integer" },
+        "roadCondition": { "type": "string" },
+        "healthScore": { "type": "number" }
       }
     }
   },
   "auth": {
     "providers": ["password", "anonymous"]
+  },
+  "dataConnect": {
+    "description": "Primary relational engine for deep-grid street telemetry and vector search.",
+    "service": "geovideography-service",
+    "location": "us-central1"
   },
   "firestore": {
     "structure": [
@@ -33,14 +61,9 @@
         "path": "/countries/{countryId}",
         "definition": {
           "entityName": "Country",
-          "description": "Public country registry."
+          "description": "Public country registry mirrored from Data Connect for fast edge reads."
         }
       }
     ]
-  },
-  "dataConnect": {
-    "description": "Primary relational engine for deep-grid street telemetry and vector search.",
-    "service": "geovideography-service",
-    "location": "us-central1"
   }
 }

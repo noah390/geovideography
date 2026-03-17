@@ -1,37 +1,34 @@
-
-# Geovideography Deep-Grid Schema
-# Hierarchy: Country -> LGA -> Town -> Street
+# Geovideography Global Grid Schema
+# Hierarchical Relational Model for Sovereign Intelligence
 
 type Country @table {
   id: UUID! @default(expr: "uuid_generate_v4()")
-  name: String!
+  name: String! @index
   flagUrl: String!
-  history: String!
-  population: Int!
-  continent: String!
-  lat: Float!
-  lng: Float!
+  historySummary: String!
+  populationCount: Int!
 }
 
 type LGA @table {
   id: UUID! @default(expr: "uuid_generate_v4()")
-  name: String!
+  name: String! @index
   country: Country!
 }
 
 type Town @table {
   id: UUID! @default(expr: "uuid_generate_v4()")
-  name: String! @searchable
+  name: String! @index
   lga: LGA!
 }
 
 type Street @table {
   id: UUID! @default(expr: "uuid_generate_v4()")
-  name: String! @searchable
+  name: String! @index
   town: Town!
   videoUrl: String
   treeCount: Int
-  roadConditionScore: Float
-  healthIndex: Float
-  embedding: Vector @size(768)
+  roadCondition: String
+  healthScore: Float
+  # Semantic embedding for AI-powered discovery (e.g., 'find me leafy streets')
+  descriptionEmbedding: Vector @size(768)
 }
