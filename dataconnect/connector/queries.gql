@@ -1,0 +1,50 @@
+# Geovideography Extraction Queries
+
+# 1. Hierarchical Extraction: Get all streets in a town
+query GetTownIntelligence($townName: String!) {
+  towns(where: { name: { eq: $townName } }) {
+    id
+    name
+    lga {
+      name
+      country {
+        name
+      }
+    }
+    streets_on_town {
+      name
+      healthIndex
+      roadConditionScore
+      treeCount
+    }
+  }
+}
+
+# 2. High-Speed Street Search
+query SearchStreetArchive($nameQuery: String!) {
+  streets(where: { name: { contains: $nameQuery } }) {
+    id
+    name
+    town {
+      name
+    }
+  }
+}
+
+# 3. Neural Semantic Search (Vector)
+# Used to find streets based on descriptions like "leafy quiet neighborhoods"
+query FindStreetsByVibe($vibeEmbedding: Vector!) {
+  street_descriptionEmbedding_similarity(
+    compare: $vibeEmbedding,
+    method: COSINE,
+    limit: 10
+  ) {
+    id
+    name
+    treeCount
+    healthIndex
+    town {
+      name
+    }
+  }
+}

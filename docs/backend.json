@@ -1,107 +1,46 @@
 {
   "entities": {
-    "Continent": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Continent",
-      "type": "object",
-      "description": "Represents a major landmass or geographical region.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier (e.g., 'africa')."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the continent."
-        }
-      },
-      "required": [
-        "id",
-        "name"
-      ]
-    },
     "Country": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Country",
       "type": "object",
-      "description": "Represents a sovereign country with its administrative data and history.",
+      "description": "Sovereign nation data.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "ISO alpha-2 code."
-        },
-        "name": {
-          "type": "string"
-        },
-        "capital": {
-          "type": "string"
-        },
-        "population": {
-          "type": "number"
-        },
-        "continent": {
-          "type": "string",
-          "enum": ["Africa", "Americas", "Asia", "Europe", "Oceania"]
-        },
-        "subregion": {
-          "type": "string"
-        },
-        "flagUrl": {
-          "type": "string",
-          "format": "uri"
-        },
-        "history": {
-          "type": "string",
-          "description": "The historical story of the nation."
-        },
-        "statesCount": {
-          "type": "number"
-        },
-        "lgasCount": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "capital",
-        "continent",
-        "flagUrl",
-        "history",
-        "statesCount",
-        "lgasCount"
-      ]
+        "name": { "type": "string" },
+        "flagUrl": { "type": "string", "format": "uri" },
+        "history": { "type": "string" },
+        "population": { "type": "number" }
+      }
+    },
+    "Street": {
+      "title": "Street Telemetry",
+      "type": "object",
+      "description": "Granular infrastructure intelligence.",
+      "properties": {
+        "name": { "type": "string" },
+        "treeCount": { "type": "number" },
+        "roadConditionScore": { "type": "number" },
+        "healthIndex": { "type": "number" },
+        "videoUrl": { "type": "string" }
+      }
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous"
-    ]
+    "providers": ["password", "anonymous"]
   },
   "firestore": {
     "structure": [
       {
-        "path": "/continents/{continentId}",
-        "definition": {
-          "entityName": "Continent",
-          "schema": {
-            "$ref": "#/backend/entities/Continent"
-          },
-          "description": "Public list of continents."
-        }
-      },
-      {
         "path": "/countries/{countryId}",
         "definition": {
           "entityName": "Country",
-          "schema": {
-            "$ref": "#/backend/entities/Country"
-          },
-          "description": "Public list of countries with real-time data."
+          "description": "Public country registry."
         }
       }
-    ],
-    "reasoning": "We use top-level collections for Continents and Countries as they are global reference data. This allows for efficient filtering by continent and global searching."
+    ]
+  },
+  "dataConnect": {
+    "description": "Primary relational engine for deep-grid street telemetry and vector search.",
+    "service": "geovideography-service",
+    "location": "us-central1"
   }
 }

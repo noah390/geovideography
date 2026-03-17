@@ -1,0 +1,5 @@
+connectorId: geovideography-connector
+generate:
+  javascriptSdk:
+    outputDir: "../../src/generated/dataconnect"
+    package: "@geovideography/dataconnect"
